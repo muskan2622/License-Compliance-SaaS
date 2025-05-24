@@ -1,4 +1,4 @@
-import { scanFile } from '../utils/file-scanning'
+import { scanFile,detectPackageManagers } from '../utils/file-scanning'
 import { identifyLicense } from '../utils/license-identification';
 import { parseManifest } from '../utils/manifest-parsing';
 import { ScanResult } from '../types/scan';
@@ -9,10 +9,11 @@ export async function performProjectScan(projectPath: any): Promise<ScanResult> 
     licenseViolations: [],
     dependencies: [],
     issues: [],
+    packageManagers: [], // ✅ initialize here
   };
 
   // 1. Discover project files
-  const files = await findProjectFiles(projectPath); // Assume this function finds files
+  const files = await findProjectFiles(projectPath);
 
   // 2. Scan each file
   for (const file of files) {
@@ -21,7 +22,6 @@ export async function performProjectScan(projectPath: any): Promise<ScanResult> 
       if (fileScanResult.vulnerabilities.length > 0) {
         scanResult.vulnerabilities.push(...fileScanResult.vulnerabilities);
       }
-      // ... other file scan logic
     } catch (error) {
       scanResult.issues.push({
         file: file,
@@ -46,8 +46,18 @@ export async function performProjectScan(projectPath: any): Promise<ScanResult> 
     scanResult.issues.push({ error: `Manifest parsing failed: ${error}` });
   }
 
+  // ✅ 5. Detect package managers
+  try {
+    scanResult.packageManagers = await detectPackageManagers(projectPath);
+  } catch (error) {
+    scanResult.issues.push({ error: `Package manager detection failed: ${error}` });
+  }
+
   return scanResult;
 }
+
+
+
 
 // (Helper function - adapt as needed)
 async function findProjectFiles(projectPath: any): Promise<string[]> {

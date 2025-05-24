@@ -1,3 +1,6 @@
+
+import * as path from 'path';
+import * as fs from 'fs/promises'; // Or just 'fs' if not using promises
 import { Vulnerability } from '../types/scan';
 
 export async function scanFile(filePath: string): Promise<{ vulnerabilities: Vulnerability[] }> {
@@ -15,4 +18,27 @@ export async function scanFile(filePath: string): Promise<{ vulnerabilities: Vul
   }
 
   return { vulnerabilities };
+}
+export async function detectPackageManagers(projectPath: string): Promise<string[]> {
+  const detected: string[] = [];
+  const checks: { [key: string]: string } = {
+    npm: 'package.json',
+    pip: 'requirements.txt',
+    yarn: 'yarn.lock',
+    poetry: 'pyproject.toml',
+    maven: 'pom.xml',
+    gradle: 'build.gradle',
+    composer: 'composer.json',
+    golang: 'go.mod',
+    cargo: 'Cargo.toml',
+  };
+
+  for (const [manager, fileName] of Object.entries(checks)) {
+    try {
+      await fs.access(path.join(projectPath, fileName));
+      detected.push(manager);
+    } catch {}
+  }
+
+  return detected;
 }

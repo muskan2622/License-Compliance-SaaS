@@ -23,8 +23,9 @@ export interface ScanIssue {
 }
 
 export interface ScanResult {
-  vulnerabilities: Vulnerability[];
-  licenseViolations: LicenseViolation[];
-  dependencies: Dependency[];
-  issues: ScanIssue[];
+  vulnerabilities: any[];
+  licenseViolations: any[];
+  dependencies: any[];
+  issues: { file?: string; error: string }[];
+  packageManagers?: string[]; // ✅ Add this
 }
