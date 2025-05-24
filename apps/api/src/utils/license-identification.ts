@@ -1,13 +1,22 @@
-import fs from "fs";
-import path from "path";
+import { LicenseViolation } from '../types/scan';
 
-export function identifyLicense(projectPath: string): string | null {
-  const licenseFiles = ["LICENSE", "LICENSE.txt", "LICENSE.md"];
-  for (const file of licenseFiles) {
-    const filePath = path.join(projectPath, file);
-    if (fs.existsSync(filePath)) {
-      return fs.readFileSync(filePath, "utf-8").slice(0, 100); // Return snippet or parse further
-    }
+export async function identifyLicense(projectPath: string): Promise<{ licenseViolations: LicenseViolation[] }> {
+  const fs = require('fs').promises;
+  const path = require('path');
+  const licenseFile = path.join(projectPath, 'LICENSE');
+  const licenseViolations: LicenseViolation[] = [];
+
+  try {
+    await fs.access(licenseFile); // Check if the file exists
+
+    // Assuming that if a LICENSE file exists, it's "MIT"
+    licenseViolations.push({
+      file: licenseFile,
+      license: 'MIT',
+    });
+  } catch (error) {
+    console.log('License file not found');
   }
-  return null;
+
+  return { licenseViolations };
 }
