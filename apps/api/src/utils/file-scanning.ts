@@ -1,17 +1,18 @@
-import fs from "fs";
-import path from "path";
+import { Vulnerability } from '../types/scan';
 
-const MANIFESTS = ["package.json", "requirements.txt", "pom.xml", "go.mod"];
+export async function scanFile(filePath: string): Promise<{ vulnerabilities: Vulnerability[] }> {
+  const fs = require('fs').promises;
+  const content = await fs.readFile(filePath, 'utf8');
+  const vulnerabilities: Vulnerability[] = [];
 
-export function scanProject(projectPath: string): string[] {
-  let found: string[] = [];
-  function scan(dir: string) {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) scan(fullPath);
-      else if (MANIFESTS.includes(entry.name)) found.push(fullPath);
-    }
+  // Simple example: Check for the use of "eval()"
+  if (content.includes('eval(')) {
+    vulnerabilities.push({
+      file: filePath,
+      severity: 'high',
+      description: 'Possible use of eval() function',
+    });
   }
-  scan(projectPath);
-  return found;
+
+  return { vulnerabilities };
 }
