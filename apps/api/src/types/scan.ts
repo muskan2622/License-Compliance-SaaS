@@ -21,11 +21,11 @@ export interface ScanIssue {
   file?: string;
   error: string;
 }
-
 export interface ScanResult {
   vulnerabilities: any[];
   licenseViolations: any[];
   dependencies: any[];
   issues: { file?: string; error: string }[];
-  packageManagers?: string[]; // ✅ Add this
+  packageManagers: string[];
+  sbom?: any; // <-- Add this line
 }
