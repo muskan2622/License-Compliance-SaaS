@@ -9,7 +9,7 @@ export async function performProjectScan(projectPath: any): Promise<ScanResult> 
     licenseViolations: [],
     dependencies: [],
     issues: [],
-    packageManagers: [], // ✅ initialize here
+    packageManagers: [], 
   };
 
   // 1. Discover project files

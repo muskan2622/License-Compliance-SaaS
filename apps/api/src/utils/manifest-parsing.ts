@@ -40,7 +40,6 @@ export async function parseManifest(projectPath: string): Promise<{ dependencies
     // requirements.txt not found, skip
   }
 
-  // Add more package manager support here (e.g., pom.xml for Maven, go.mod for Go)
 
   return { dependencies };
 }
