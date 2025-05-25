@@ -2,6 +2,8 @@ import { scanFile,detectPackageManagers } from '../utils/file-scanning'
 import { identifyLicense } from '../utils/license-identification';
 import { parseManifest } from '../utils/manifest-parsing';
 import { ScanResult } from '../types/scan';
+import { PolicyManager } from '../utils/policy-management';
+import { IntegrationManager } from '../utils/integration';
 
 export async function performProjectScan(projectPath: any): Promise<ScanResult> {
   const scanResult: ScanResult = {
@@ -30,6 +32,15 @@ export async function performProjectScan(projectPath: any): Promise<ScanResult> 
     }
   }
 
+    const policyManager = new PolicyManager();
+  const detectedLicenses = scanResult.dependencies.map(dep => dep.license).filter(Boolean);
+  const policyViolations = await policyManager.checkPolicyViolations(detectedLicenses);
+  scanResult.licenseViolations.push(...policyViolations);
+
+  // Generate SBOM
+  const integrationManager = new IntegrationManager();
+  const sbom = await integrationManager.generateSBOM(scanResult);
+
   // 3. Identify licenses
   try {
     const licenseInfo = await identifyLicense(projectPath);
@@ -53,7 +64,10 @@ export async function performProjectScan(projectPath: any): Promise<ScanResult> 
     scanResult.issues.push({ error: `Package manager detection failed: ${error}` });
   }
 
-  return scanResult;
+   return {
+    ...scanResult,
+    sbom,
+  };
 }
 
 
